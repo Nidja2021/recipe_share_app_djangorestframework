@@ -36,7 +36,7 @@ class LoginView(APIView):
             data = request.data
             serializer = LoginSerializer(data=data)
             if not serializer.is_valid():
-                print(serializer.data)
+                print("data", serializer.data)
                 return Response({
                     'data': serializer.errors,
                     'message': 'Something went wrong'

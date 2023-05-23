@@ -29,30 +29,29 @@ class RegisterSerializer(serializers.Serializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    username = serializers.CharField()
     password = serializers.CharField()
 
     def validate(self, data):
-        if not User.objects.filter(email=data['email']).exists():
-            raise serializers.ValidationError('Account not found')
+        if not User.objects.filter(username=data['username']).exists():
+            raise serializers.ValidationError('User does not exist.')
         return data
 
     def get_jwt_token(self, data):
-        email = data.get('email')
-        password = data.get('password')
-
-        user = authenticate(email=email, password=password)
-
+        user = authenticate(
+            username=data['username'],
+            password=data['password']
+        )
         print('serializer', user)
         if not user:
-            raise serializers.ValidationError('Invalid Credentials.')
+            return {'data': {}, 'message': 'Invalid credentials'}
 
         refresh = RefreshToken.for_user(user)
         return {
             'data': {
                 'token': {
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token)
+                    'access': str(refresh.access_token),
+                    'refresh': str(refresh)
                 }
             },
             'message': 'Login success'
